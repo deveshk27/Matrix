@@ -5,6 +5,8 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { RecoilRoot, useRecoilState, useSetRecoilState } from "recoil";
 import { userAtom } from "./store/atoms/user";
 import { initializeApp } from "firebase/app";
+import { Topbar } from "./components/Topbar";
+import { Card } from "./components/Card";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAjjsbl9eSDWSmfrWpFPap2uGuwONZ2N4g",
@@ -60,7 +62,14 @@ function StoreApp() {
     );
   }
 
-  return <>You are logged in as {user.user.email}</>;
+  return (
+    <div className="place-items-center grid">
+      <div className="max-w-screen-lg w-full">
+        <Topbar />
+        <Card>Hi there </Card>
+      </div>
+    </div>
+  );
 }
 
 export default App;
