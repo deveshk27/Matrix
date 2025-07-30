@@ -15,6 +15,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Landing } from "./components/Landing";
 import SubmissionActivity from "./components/SubmissionActivity";
 import { About } from "./components/About";
+import { Submissions } from "./components/Submissions";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAAEubKiRqY5KkJfwL6wHZnOjl8m5Swy68",
@@ -85,7 +86,7 @@ function StoreApp() {
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/about" element={<About />} />
-            <Route path="/activity" element={<SubmissionActivityList />} />
+            <Route path="/activity" element={<Submissions/>} />
             <Route
               path="/problems"
               element={<ProblemList problemList={problemList} />}
