@@ -7,15 +7,23 @@ import { userAtom } from "./store/atoms/user";
 import { initializeApp } from "firebase/app";
 import { Topbar } from "./components/Topbar";
 import { Card } from "./components/Card";
+import { Leaderboard } from "./components/Leaderboard";
+// import { SubmissionActivity } from "./components/SubmissionActivity";
+import { SubmissionActivityList } from "./components/SubmissionActivityList";
+import { ProblemList } from "./components/ProblemsList";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Landing } from "./components/Landing";
+import SubmissionActivity from "./components/SubmissionActivity";
+import { About } from "./components/About";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAjjsbl9eSDWSmfrWpFPap2uGuwONZ2N4g",
-  authDomain: "leetcode-clone-c39eb.firebaseapp.com",
-  projectId: "leetcode-clone-c39eb",
-  storageBucket: "leetcode-clone-c39eb.appspot.com",
-  messagingSenderId: "66814187798",
-  appId: "1:66814187798:web:a6b3702e191448722dd837",
-  measurementId: "G-ET5FNB5WCN",
+  apiKey: "AIzaSyAAEubKiRqY5KkJfwL6wHZnOjl8m5Swy68",
+  authDomain: "matrix-f2b76.firebaseapp.com",
+  projectId: "matrix-f2b76",
+  storageBucket: "matrix-f2b76.firebasestorage.app",
+  messagingSenderId: "1009173630547",
+  appId: "1:1009173630547:web:537a4f3d1429fa851380a6",
+  measurementId: "G-BNZ5SY00ZR",
 };
 
 // Initialize Firebase
@@ -32,6 +40,13 @@ function App() {
 
 function StoreApp() {
   const [user, setUser] = useRecoilState(userAtom);
+  const problemList = [
+    { id: "1", problemName: "Two Sum", tags: ["Array", "Hash Table"] },
+    { id: "2", problemName: "Reverse String", tags: ["String"] },
+    { id: "3", problemName: "Palindrome Check", tags: ["String"] },
+    { id: "4", problemName: "Merge Intervals", tags: ["Array", "Sorting"] },
+  ];
+
   useEffect(() => {
     onAuthStateChanged(auth, function (user) {
       if (user && user.email) {
@@ -65,8 +80,23 @@ function StoreApp() {
   return (
     <div className="place-items-center grid">
       <div className="max-w-screen-lg w-full">
-        <Topbar />
-        <Card>Hi there </Card>
+        <BrowserRouter>
+          <Topbar />
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/activity" element={<SubmissionActivityList />} />
+            <Route
+              path="/problems"
+              element={<ProblemList problemList={problemList} />}
+            />
+            <Route path="leaderboard" element={<Leaderboard />}/>
+          </Routes>
+        </BrowserRouter>
+        {/* <Card>Hi there </Card> */}
+        {/* <Leaderboard /> */}
+        {/* <SubmissionActivityList /> */}
+        {/* <ProblemList problemList={problems}/> */}
       </div>
     </div>
   );
