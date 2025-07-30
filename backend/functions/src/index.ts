@@ -17,74 +17,28 @@ export const helloWorld = onRequest((request, response) => {
 });
 
 export const getSubmissions = onRequest({ cors: true }, async (request, response) => {
-    try {
-    const limit = (request.body.limit && typeof request.body.limit === 'number') ? request.body.limit : 10;
-    logger.info(`Fetching submissions with limit: ${limit}`);
+    // const offset = request.body.offset;
+    const limit = request.body.limit || 10;
+    const res = await db.collection("submissions").limit(limit).orderBy("submitTime", "desc").get();
+    const submissions : any[] = [];
+    console.log("res.docs")
+    console.log(res.docs.length)
+    res.docs.forEach(async doc => {
+        console.log("doc1");
+        submissions.push(new Promise(async (resolve) => {
+                console.log(doc.data().user)
+                const snapshot = await doc.data().user.get();
+                resolve({
+                    submission: doc.data(),
+                    user: snapshot.data()
+                })
+        }))
+    })
 
-    // 1. Get the submission documents
-    const submissionsQuerySnapshot = await db.collection("submissions")
-      .limit(limit)
-      .orderBy("submitTime", "desc")
-      .get();
-
-    logger.info(`Found ${submissionsQuerySnapshot.docs.length} submission documents.`);
-
-    const submissionsWithUserDataPromises: Promise<any>[] = [];
-
-    // 2. Iterate through each submission and fetch associated user data
-    submissionsQuerySnapshot.docs.forEach(submissionDoc => {
-      const submissionData = submissionDoc.data();
-      const userId = submissionData.userId; // Correctly access the 'userId' field
-
-      if (typeof userId === 'string' && userId) {
-        // We push a promise into the array for each submission
-        // This allows us to fetch user data for all submissions concurrently
-        submissionsWithUserDataPromises.push(
-          (async () => {
-            try {
-              // Create a DocumentReference to the user document
-              const userRef = db.collection("users").doc(userId);
-              const userSnapshot = await userRef.get();
-
-              return {
-                submission: submissionData,
-                user: userSnapshot.exists ? userSnapshot.data() : null // Return user data, or null if user not found
-              };
-            } catch (userFetchError) {
-              logger.error(`Error fetching user data for submission ID: ${submissionDoc.id} (User ID: ${userId}):`, userFetchError);
-              // In case of error, still return the submission data but with null user
-              return {
-                submission: submissionData,
-                user: null
-              };
-            }
-          })() // Immediately invoke the async function to get the Promise
-        );
-      } else {
-        logger.warn(`Submission ID: ${submissionDoc.id} has an invalid or missing userId:`, userId);
-        // If userId is invalid, still add a resolved promise to keep `Promise.all` working
-        submissionsWithUserDataPromises.push(Promise.resolve({
-          submission: submissionData,
-          user: null // No valid user ID found
-        }));
-      }
-    });
-
-    // 3. Wait for all user data fetches to complete
-    const resolvedSubmissions = await Promise.all(submissionsWithUserDataPromises);
-
-    logger.info("All submissions and user data fetched successfully.");
-    response.status(200).send({
-      response: resolvedSubmissions
-    });
-
-  } catch (error) {
-    logger.error("Caught an unexpected error in getSubmissions function:", error);
-    response.status(500).send({
-      error: "An internal server error occurred while retrieving submissions."
-    });
-  }
-});
+    response.send({
+        response: await Promise.all(submissions)
+    })
+})
 
 export const submit = onCall(async (request) => {
   const uid = request.auth?.uid;
